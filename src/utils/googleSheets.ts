@@ -7,10 +7,10 @@ interface Video {
   title: string;
   image_url: string;
   category: string;
-  streaming_link: string;
-  download_link: string;
+  embed_code: string; // Updated from streaming_link
+  download: string;   // Updated from download_link
   added_date: string;
-  description: string;
+  description: string; // Updated from "descripton"
   duration: string;
   tag: string;
 }
@@ -38,18 +38,32 @@ interface Tag {
 
 const fetchSheet = async (sheetName: string) => {
   try {
-    const response = await fetch(
-      `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${sheetName}?key=${API_KEY}`
-    );
+    // Add cache busting to prevent browser caching
+    const cacheBuster = new Date().getTime();
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${sheetName}?key=${API_KEY}&cacheBuster=${cacheBuster}`;
+    
+    console.log(`Fetching sheet: ${sheetName}`);
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      // Add these options to help with CORS issues
+      mode: 'cors',
+      credentials: 'omit',
+    });
     
     if (!response.ok) {
       throw new Error(`Error fetching Google Sheets data: ${response.statusText}`);
     }
     
     const data = await response.json();
+    console.log(`Successfully fetched sheet: ${sheetName}`, data);
     return data.values;
   } catch (error) {
-    console.error('Error fetching Google Sheets data:', error);
+    console.error(`Error fetching Google Sheets data for sheet ${sheetName}:`, error);
+    // Return a minimal structure to prevent further errors
     return [];
   }
 };
@@ -107,8 +121,29 @@ export const fetchVideos = async (): Promise<Video[]> => {
     return values.slice(1).map((row: any) => {
       const video: any = {};
       headers.forEach((header: string, index: number) => {
-        video[header] = row[index] || '';
+        // Map the old column names to new ones if they exist
+        if (header === 'embed_code') {
+          video.embed_code = row[index] || '';
+        } else if (header === 'download') {
+          video.download = row[index] || '';
+        } else if (header === 'descripton' || header === 'description') {
+          video.description = row[index] || ''; // Normalize to 'description'
+        } else {
+          video[header] = row[index] || '';
+        }
       });
+      
+      // Backward compatibility for old column names if they exist
+      if (headers.includes('streaming_link') && !video.embed_code) {
+        const idx = headers.indexOf('streaming_link');
+        if (idx >= 0 && row[idx]) video.embed_code = row[idx];
+      }
+      
+      if (headers.includes('download_link') && !video.download) {
+        const idx = headers.indexOf('download_link');
+        if (idx >= 0 && row[idx]) video.download = row[idx];
+      }
+      
       return video as Video;
     });
   } catch (error) {
@@ -128,8 +163,29 @@ export const fetchPremiumVideos = async (): Promise<PremiumVideo[]> => {
     return values.slice(1).map((row: any) => {
       const video: any = {};
       headers.forEach((header: string, index: number) => {
-        video[header] = row[index] || '';
+        // Map the old column names to new ones if they exist
+        if (header === 'embed_code') {
+          video.embed_code = row[index] || '';
+        } else if (header === 'download') {
+          video.download = row[index] || '';
+        } else if (header === 'descripton' || header === 'description') {
+          video.description = row[index] || ''; // Normalize to 'description'
+        } else {
+          video[header] = row[index] || '';
+        }
       });
+      
+      // Backward compatibility for old column names
+      if (headers.includes('streaming_link') && !video.embed_code) {
+        const idx = headers.indexOf('streaming_link');
+        if (idx >= 0 && row[idx]) video.embed_code = row[idx];
+      }
+      
+      if (headers.includes('download_link') && !video.download) {
+        const idx = headers.indexOf('download_link');
+        if (idx >= 0 && row[idx]) video.download = row[idx];
+      }
+      
       return video as PremiumVideo;
     });
   } catch (error) {

@@ -41,6 +41,8 @@ const VideoPage = () => {
   // Function to safely embed streaming URLs
   const getSafeEmbedUrl = (url: string) => {
     try {
+      if (!url) return "";
+      
       // Handle YouTube embedding
       if (url.includes('youtube.com/embed/') || url.includes('youtu.be/')) {
         return url;
@@ -57,7 +59,7 @@ const VideoPage = () => {
       // Return original URL if no patterns match
       return url;
     } catch (error) {
-      console.error("Error processing streaming URL:", error);
+      console.error("Error processing embed URL:", error);
       return "";
     }
   };
@@ -74,9 +76,9 @@ const VideoPage = () => {
             ) : (
               <>
                 <div className="video-container relative" style={{ paddingBottom: '56.25%' }}>
-                  {video.streaming_link ? (
+                  {video.embed_code ? (
                     <iframe
-                      src={getSafeEmbedUrl(video.streaming_link)}
+                      src={getSafeEmbedUrl(video.embed_code)}
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
                       className="absolute w-full h-full"
@@ -96,9 +98,9 @@ const VideoPage = () => {
                     <span className="text-sm text-gray-500">Duration: {video.duration}</span>
                   </div>
                   
-                  {video.download_link && (
+                  {video.download && (
                     <a
-                      href={video.download_link}
+                      href={video.download}
                       className="inline-flex items-center mt-4 bg-adult-button text-white px-4 py-2 rounded-md"
                       target="_blank"
                       rel="noopener noreferrer"
