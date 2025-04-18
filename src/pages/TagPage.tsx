@@ -67,16 +67,21 @@ const TagPage = () => {
           </div>
         ) : taggedVideos.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {taggedVideos.map((video) => (
-              <VideoCard
-                key={video.id}
-                id={video.id}
-                title={video.title}
-                imageUrl={video.image_url}
-                duration={video.duration}
-                isPremium={video.Premium_sub_id ? true : false}
-              />
-            ))}
+            {taggedVideos.map((video) => {
+              // Check if this is a premium video by seeing if it's from the premium videos array
+              const isPremium = premiumVideos?.some(pv => pv.id === video.id) || false;
+              
+              return (
+                <VideoCard
+                  key={video.id}
+                  id={video.id}
+                  title={video.title}
+                  imageUrl={video.image_url}
+                  duration={video.duration}
+                  isPremium={isPremium}
+                />
+              );
+            })}
           </div>
         ) : (
           <div className="text-center py-12">
