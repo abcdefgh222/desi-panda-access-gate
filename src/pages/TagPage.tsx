@@ -74,7 +74,7 @@ const TagPage = () => {
                 title={video.title}
                 imageUrl={video.image_url}
                 duration={video.duration}
-                isPremium={!!video.Premium_sub_id}
+                isPremium={video.Premium_sub_id ? true : false}
               />
             ))}
           </div>

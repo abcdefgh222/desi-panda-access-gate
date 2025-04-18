@@ -46,19 +46,20 @@ const VideoPage = () => {
         <div className="flex flex-col lg:flex-row gap-4">
           <div className="lg:w-3/4">
             {!video ? (
-              <div className="video-container animate-pulse bg-gray-200"></div>
+              <div className="video-container animate-pulse bg-gray-200" style={{ paddingBottom: '56.25%', position: 'relative' }}></div>
             ) : (
               <>
-                <div className="video-container">
+                <div className="video-container relative" style={{ paddingBottom: '56.25%' }}>
                   {video.streaming_link ? (
                     <iframe
                       src={video.streaming_link}
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
                       className="absolute w-full h-full"
+                      title={video.title}
                     ></iframe>
                   ) : (
-                    <div className="flex items-center justify-center h-full bg-black">
+                    <div className="flex items-center justify-center h-full bg-black absolute w-full">
                       <p className="text-white">Video not available</p>
                     </div>
                   )}

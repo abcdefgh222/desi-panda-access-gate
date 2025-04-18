@@ -185,12 +185,6 @@ const Header: React.FC = () => {
                   </ul>
                 </NavigationMenuContent>
               </NavigationMenuItem>
-
-              <NavigationMenuItem>
-                <Link to="/recent" className="px-3 py-2 text-sm font-medium">
-                  Recent
-                </Link>
-              </NavigationMenuItem>
               
               <NavigationMenuItem>
                 <Link to="/popular" className="px-3 py-2 text-sm font-medium">
@@ -326,13 +320,6 @@ const Header: React.FC = () => {
             onClick={() => setIsMobileMenuOpen(false)}
           >
             Premium
-          </Link>
-          <Link 
-            to="/recent" 
-            className="block px-3 py-2 rounded-md hover:bg-gray-100"
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            Recent
           </Link>
           <Link 
             to="/popular" 

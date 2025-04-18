@@ -37,17 +37,17 @@ const Footer: React.FC = () => {
                   2257 Statement
                 </Link>
               </li>
+              <li>
+                <Link to="/faq" className="hover:text-white transition-colors">
+                  FAQ
+                </Link>
+              </li>
             </ul>
           </div>
           
           <div>
             <h3 className="text-white font-bold text-lg mb-4">Info</h3>
             <ul className="space-y-2 text-sm">
-              <li>
-                <Link to="/faq" className="hover:text-white transition-colors">
-                  FAQ
-                </Link>
-              </li>
               <li>
                 <Link to="/contact" className="hover:text-white transition-colors">
                   Contact
