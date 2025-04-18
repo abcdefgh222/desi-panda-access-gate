@@ -16,6 +16,8 @@ import RegisterPage from "./pages/RegisterPage";
 import TermsPage from "./pages/TermsPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import DmcaPage from "./pages/DmcaPage";
+import SearchPage from "./pages/SearchPage";
+import TagPage from "./pages/TagPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +34,8 @@ const App = () => (
             <Route path="/category/:categoryId" element={<CategoryPage />} />
             <Route path="/premium/:subcategoryId" element={<PremiumSubcategoryPage />} />
             <Route path="/video/:videoId" element={<VideoPage />} />
+            <Route path="/search" element={<SearchPage />} />
+            <Route path="/tag/:tagId" element={<TagPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/terms" element={<TermsPage />} />

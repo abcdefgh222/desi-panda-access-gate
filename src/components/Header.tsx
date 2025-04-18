@@ -1,9 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Menu, Search, User, X } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
+import { useQuery } from '@tanstack/react-query';
+import { fetchVideos, fetchCategories } from '@/utils/googleSheets';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,19 +15,97 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { logoutUser } from '@/utils/firebase';
 import { toast } from '@/hooks/use-toast';
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from '@/components/ui/navigation-menu';
+import { cn } from '@/lib/utils';
 
 const Header: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const searchRef = useRef<HTMLDivElement>(null);
+
+  const { data: videos } = useQuery({
+    queryKey: ['videos'],
+    queryFn: fetchVideos,
+  });
+
+  const { data: categories } = useQuery({
+    queryKey: ['categories'],
+    queryFn: fetchCategories,
+  });
+
+  useEffect(() => {
+    // Click outside to close suggestions
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (searchQuery.trim().length < 2) {
+      setSuggestions([]);
+      return;
+    }
+
+    const query = searchQuery.toLowerCase();
+    
+    // Video title suggestions
+    const videoSuggestions = videos
+      ?.filter(video => video.title.toLowerCase().includes(query))
+      .slice(0, 5)
+      .map(video => ({
+        id: video.id,
+        text: video.title,
+        type: 'video'
+      })) || [];
+    
+    // Category suggestions
+    const categorySuggestions = categories
+      ?.filter(category => category.Category.toLowerCase().includes(query))
+      .slice(0, 3)
+      .map(category => ({
+        id: category.Category_id,
+        text: category.Category,
+        type: 'category'
+      })) || [];
+    
+    setSuggestions([...videoSuggestions, ...categorySuggestions]);
+  }, [searchQuery, videos, categories]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
       setSearchQuery('');
+      setShowSuggestions(false);
     }
+  };
+
+  const handleSuggestionClick = (suggestion: any) => {
+    if (suggestion.type === 'video') {
+      navigate(`/video/${suggestion.id}`);
+    } else if (suggestion.type === 'category') {
+      navigate(`/category/${suggestion.id}`);
+    }
+    setSearchQuery('');
+    setShowSuggestions(false);
   };
 
   const handleLogout = async () => {
@@ -66,23 +146,106 @@ const Header: React.FC = () => {
           </Link>
         </div>
 
-        <form onSubmit={handleSearch} className="flex-1 mx-4 hidden md:block">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search any category or videos..."
-              className="search-bar"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <button 
-              type="submit" 
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-            >
-              <Search size={20} />
-            </button>
-          </div>
-        </form>
+        {/* Desktop Navigation Menu */}
+        <div className="hidden md:flex items-center">
+          <NavigationMenu>
+            <NavigationMenuList>
+              <NavigationMenuItem>
+                <Link to="/" className="px-3 py-2 text-sm font-medium">
+                  Home
+                </Link>
+              </NavigationMenuItem>
+              
+              <NavigationMenuItem>
+                <NavigationMenuTrigger>Categories</NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                    {categories?.slice(0, 8).map((category) => (
+                      <li key={category.Category_id}>
+                        <NavigationMenuLink asChild>
+                          <Link
+                            to={`/category/${category.Category_id}`}
+                            className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                          >
+                            <div className="text-sm font-medium leading-none">{category.Category}</div>
+                          </Link>
+                        </NavigationMenuLink>
+                      </li>
+                    ))}
+                    <li>
+                      <NavigationMenuLink asChild>
+                        <Link
+                          to="/premium"
+                          className="block select-none space-y-1 rounded-md bg-gradient-to-r from-pink-500 to-purple-500 p-3 leading-none text-white no-underline outline-none transition-colors hover:brightness-110"
+                        >
+                          <div className="text-sm font-medium leading-none">Premium Content</div>
+                        </Link>
+                      </NavigationMenuLink>
+                    </li>
+                  </ul>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+
+              <NavigationMenuItem>
+                <Link to="/recent" className="px-3 py-2 text-sm font-medium">
+                  Recent
+                </Link>
+              </NavigationMenuItem>
+              
+              <NavigationMenuItem>
+                <Link to="/popular" className="px-3 py-2 text-sm font-medium">
+                  Popular
+                </Link>
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenu>
+        </div>
+
+        <div ref={searchRef} className="flex-1 mx-4 hidden md:block relative">
+          <form onSubmit={handleSearch}>
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search any category or videos..."
+                className="search-bar"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setShowSuggestions(true);
+                }}
+                onFocus={() => setShowSuggestions(true)}
+              />
+              <button 
+                type="submit" 
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              >
+                <Search size={20} />
+              </button>
+            </div>
+          </form>
+
+          {/* Search Suggestions */}
+          {showSuggestions && suggestions.length > 0 && (
+            <div className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg">
+              {suggestions.map((suggestion, index) => (
+                <div 
+                  key={`${suggestion.type}-${suggestion.id}`}
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center"
+                  onClick={() => handleSuggestionClick(suggestion)}
+                >
+                  {suggestion.type === 'video' ? (
+                    <Search size={14} className="mr-2 text-gray-500" />
+                  ) : (
+                    <span className="mr-2 text-xs px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded">
+                      Category
+                    </span>
+                  )}
+                  <span className="truncate">{suggestion.text}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
         <div className="flex items-center space-x-2">
           <DropdownMenu>

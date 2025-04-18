@@ -31,6 +31,11 @@ interface PremiumSubcategory {
   image_url: string;
 }
 
+interface Tag {
+  tag_name: string;
+  tag_id: string;
+}
+
 const fetchSheet = async (sheetName: string) => {
   try {
     const response = await fetch(
@@ -129,6 +134,27 @@ export const fetchPremiumVideos = async (): Promise<PremiumVideo[]> => {
     });
   } catch (error) {
     console.error('Error processing premium video data:', error);
+    return [];
+  }
+};
+
+export const fetchTags = async (): Promise<Tag[]> => {
+  try {
+    const values = await fetchSheet('tag');
+    if (!values || values.length === 0) {
+      return [];
+    }
+    
+    const headers = values[0];
+    return values.slice(1).map((row: any) => {
+      const tag: any = {};
+      headers.forEach((header: string, index: number) => {
+        tag[header] = row[index] || '';
+      });
+      return tag as Tag;
+    });
+  } catch (error) {
+    console.error('Error processing tag data:', error);
     return [];
   }
 };
