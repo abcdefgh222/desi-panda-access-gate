@@ -38,6 +38,30 @@ const VideoPage = () => {
     }
   }, [videoId, regularVideos, premiumVideos]);
 
+  // Function to safely embed streaming URLs
+  const getSafeEmbedUrl = (url: string) => {
+    try {
+      // Handle YouTube embedding
+      if (url.includes('youtube.com/embed/') || url.includes('youtu.be/')) {
+        return url;
+      }
+      
+      // If it's a direct iframe tag
+      if (url.includes('<iframe') && url.includes('src=')) {
+        const srcMatch = url.match(/src=["'](.*?)["']/);
+        if (srcMatch && srcMatch[1]) {
+          return srcMatch[1];
+        }
+      }
+      
+      // Return original URL if no patterns match
+      return url;
+    } catch (error) {
+      console.error("Error processing streaming URL:", error);
+      return "";
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -52,7 +76,7 @@ const VideoPage = () => {
                 <div className="video-container relative" style={{ paddingBottom: '56.25%' }}>
                   {video.streaming_link ? (
                     <iframe
-                      src={video.streaming_link}
+                      src={getSafeEmbedUrl(video.streaming_link)}
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
                       className="absolute w-full h-full"

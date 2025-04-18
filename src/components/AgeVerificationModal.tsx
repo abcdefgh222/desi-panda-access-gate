@@ -54,8 +54,8 @@ const AgeVerificationModal: React.FC<AgeVerificationModalProps> = ({ onVerified 
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4">
-      <div className="bg-black text-white rounded-lg p-6 max-w-2xl w-full border border-gray-700">
+    <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4 overflow-y-auto">
+      <div className="bg-black text-white rounded-lg p-6 max-w-2xl w-full border border-gray-700 my-6">
         <div className="flex items-center justify-center mb-4">
           <div className="bg-adult-red rounded-full p-4 w-24 h-24 flex items-center justify-center">
             <span className="text-4xl font-bold">18+</span>
@@ -80,8 +80,8 @@ const AgeVerificationModal: React.FC<AgeVerificationModalProps> = ({ onVerified 
           
           <p>
             If you are concerned about your children viewing any age-restricted content from being displayed on your children 
-            or wards device, we recommend to install parental controls or content filters, access this site by using parental controls. 
-            Parental tools that are free on the RTA label will better enable parental filtering. Parental tools that are 
+            or wards device, we recommend to install parental controls or content filters, access this site by using parental 
+            controls. Parental tools that are free on the RTA label will better enable parental filtering. Parental tools that are 
             compliant with the RTA label will block access to this site.
           </p>
           
@@ -99,18 +99,18 @@ const AgeVerificationModal: React.FC<AgeVerificationModalProps> = ({ onVerified 
           </ul>
         </div>
         
-        <div className="flex flex-col items-center gap-4">
+        <div className="flex flex-col items-center gap-4 mt-6 sticky bottom-4">
           <button 
             onClick={handleAccept} 
             disabled={isLoading}
-            className="entry-button w-full sm:w-auto"
+            className="entry-button w-full sm:w-auto bg-adult-button text-white px-6 py-3 rounded-md hover:bg-opacity-90 transition-colors"
           >
             {isLoading ? "Processing..." : "I AM 18+ ENTER"}
           </button>
           
           <button 
             onClick={handleReject}
-            className="text-gray-400 hover:text-white transition-colors"
+            className="text-gray-400 hover:text-white transition-colors mt-2"
           >
             No, I am under 18
           </button>
