@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,19 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				adult: {
+					'red': '#FF1A1A',
+					'bg': '#F5F2E9',
+					'card': '#FFFFFF',
+					'border': '#A0A0A0',
+					'text': '#000000',
+					'button': '#4AADD6'
 				}
+			},
+			fontFamily: {
+				sans: ['Inter', 'sans-serif'],
+				display: ['Poppins', 'sans-serif'],
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -84,11 +97,20 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'glow': {
+					'0%, 100%': {
+						boxShadow: '0 0 5px 2px rgba(74, 173, 214, 0.6)'
+					},
+					'50%': {
+						boxShadow: '0 0 15px 5px rgba(74, 173, 214, 0.8)'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'glow': 'glow 2s ease-in-out infinite'
 			}
 		}
 	},

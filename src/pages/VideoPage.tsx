@@ -1,0 +1,121 @@
+
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import { fetchVideos, fetchPremiumVideos } from '@/utils/googleSheets';
+import { Download } from 'lucide-react';
+
+const VideoPage = () => {
+  const { videoId } = useParams<{ videoId: string }>();
+  const [video, setVideo] = useState<any>(null);
+  
+  const { data: regularVideos } = useQuery({
+    queryKey: ['allVideos'],
+    queryFn: fetchVideos,
+  });
+  
+  const { data: premiumVideos } = useQuery({
+    queryKey: ['allPremiumVideos'],
+    queryFn: fetchPremiumVideos,
+  });
+  
+  useEffect(() => {
+    if (regularVideos && premiumVideos && videoId) {
+      // First check regular videos
+      const foundRegular = regularVideos.find(v => v.id === videoId);
+      if (foundRegular) {
+        setVideo(foundRegular);
+        return;
+      }
+      
+      // Then check premium videos
+      const foundPremium = premiumVideos.find(v => v.id === videoId);
+      if (foundPremium) {
+        setVideo(foundPremium);
+      }
+    }
+  }, [videoId, regularVideos, premiumVideos]);
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      
+      <main className="flex-grow max-w-7xl mx-auto px-4 py-6 w-full">
+        <div className="flex flex-col lg:flex-row gap-4">
+          <div className="lg:w-3/4">
+            {!video ? (
+              <div className="video-container animate-pulse bg-gray-200"></div>
+            ) : (
+              <>
+                <div className="video-container">
+                  {video.streaming_link ? (
+                    <iframe
+                      src={video.streaming_link}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      className="absolute w-full h-full"
+                    ></iframe>
+                  ) : (
+                    <div className="flex items-center justify-center h-full bg-black">
+                      <p className="text-white">Video not available</p>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="mt-4">
+                  <h1 className="text-xl font-bold">{video.title}</h1>
+                  <div className="flex items-center justify-between mt-2">
+                    <span className="text-sm text-gray-500">Added: {video.added_date}</span>
+                    <span className="text-sm text-gray-500">Duration: {video.duration}</span>
+                  </div>
+                  
+                  {video.download_link && (
+                    <a
+                      href={video.download_link}
+                      className="inline-flex items-center mt-4 bg-adult-button text-white px-4 py-2 rounded-md"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Download size={18} className="mr-2" />
+                      Download
+                    </a>
+                  )}
+                  
+                  <div className="mt-4">
+                    <h3 className="font-semibold">Description:</h3>
+                    <p className="text-gray-700 mt-1">{video.description || "No description available."}</p>
+                  </div>
+                  
+                  {video.tag && (
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {video.tag.split(',').map((tag: string, index: number) => (
+                        <span
+                          key={index}
+                          className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs"
+                        >
+                          {tag.trim()}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+          
+          <div className="lg:w-1/4">
+            <div className="h-full bg-gray-200 rounded-lg flex items-center justify-center">
+              <span className="text-gray-500 font-medium">ADS SPACE</span>
+            </div>
+          </div>
+        </div>
+      </main>
+      
+      <Footer />
+    </div>
+  );
+};
+
+export default VideoPage;
