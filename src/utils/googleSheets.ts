@@ -1,4 +1,3 @@
-
 const API_KEY = 'AIzaSyB5Wgld0R6C4LRpy_kgqbMQvXEfcbSC81E';
 const SPREADSHEET_ID = '1ZFGQV2H6SdT92irTPcxywTLp3ZygiJiISDZDT_g-_6o';
 
@@ -38,9 +37,8 @@ interface Tag {
 
 const fetchSheet = async (sheetName: string) => {
   try {
-    // Add cache busting to prevent browser caching
-    const cacheBuster = new Date().getTime();
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${sheetName}?key=${API_KEY}&cacheBuster=${cacheBuster}`;
+    // Remove the cacheBuster parameter that's causing the 400 error
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${sheetName}?key=${API_KEY}`;
     
     console.log(`Fetching sheet: ${sheetName}`);
     const response = await fetch(url, {
@@ -122,9 +120,9 @@ export const fetchVideos = async (): Promise<Video[]> => {
       const video: any = {};
       headers.forEach((header: string, index: number) => {
         // Map the old column names to new ones if they exist
-        if (header === 'embed_code') {
+        if (header === 'embed_code' || header === 'streaming_link') {
           video.embed_code = row[index] || '';
-        } else if (header === 'download') {
+        } else if (header === 'download' || header === 'download_link') {
           video.download = row[index] || '';
         } else if (header === 'descripton' || header === 'description') {
           video.description = row[index] || ''; // Normalize to 'description'
@@ -132,17 +130,6 @@ export const fetchVideos = async (): Promise<Video[]> => {
           video[header] = row[index] || '';
         }
       });
-      
-      // Backward compatibility for old column names if they exist
-      if (headers.includes('streaming_link') && !video.embed_code) {
-        const idx = headers.indexOf('streaming_link');
-        if (idx >= 0 && row[idx]) video.embed_code = row[idx];
-      }
-      
-      if (headers.includes('download_link') && !video.download) {
-        const idx = headers.indexOf('download_link');
-        if (idx >= 0 && row[idx]) video.download = row[idx];
-      }
       
       return video as Video;
     });
@@ -164,9 +151,9 @@ export const fetchPremiumVideos = async (): Promise<PremiumVideo[]> => {
       const video: any = {};
       headers.forEach((header: string, index: number) => {
         // Map the old column names to new ones if they exist
-        if (header === 'embed_code') {
+        if (header === 'embed_code' || header === 'streaming_link') {
           video.embed_code = row[index] || '';
-        } else if (header === 'download') {
+        } else if (header === 'download' || header === 'download_link') {
           video.download = row[index] || '';
         } else if (header === 'descripton' || header === 'description') {
           video.description = row[index] || ''; // Normalize to 'description'
@@ -174,17 +161,6 @@ export const fetchPremiumVideos = async (): Promise<PremiumVideo[]> => {
           video[header] = row[index] || '';
         }
       });
-      
-      // Backward compatibility for old column names
-      if (headers.includes('streaming_link') && !video.embed_code) {
-        const idx = headers.indexOf('streaming_link');
-        if (idx >= 0 && row[idx]) video.embed_code = row[idx];
-      }
-      
-      if (headers.includes('download_link') && !video.download) {
-        const idx = headers.indexOf('download_link');
-        if (idx >= 0 && row[idx]) video.download = row[idx];
-      }
       
       return video as PremiumVideo;
     });

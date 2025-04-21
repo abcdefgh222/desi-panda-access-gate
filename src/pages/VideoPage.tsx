@@ -38,26 +38,52 @@ const VideoPage = () => {
     }
   }, [videoId, regularVideos, premiumVideos]);
 
-  // Function to safely embed streaming URLs
+  // Function to safely extract YouTube video ID from various formats
+  const getYoutubeVideoId = (url: string): string | null => {
+    if (!url) return null;
+    
+    // Handle iframe embed codes
+    const iframeSrcMatch = url.match(/src=["'](.*?)["']/);
+    if (iframeSrcMatch && iframeSrcMatch[1]) {
+      url = iframeSrcMatch[1];
+    }
+    
+    // Match YouTube URLs
+    const regExp = /^.*(youtu.be\/|v\/|e\/|u\/\w+\/|embed\/|v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    
+    if (match && match[2].length === 11) {
+      return match[2];
+    }
+    
+    return null;
+  };
+
+  // Function to safely create embed URL
   const getSafeEmbedUrl = (url: string) => {
     try {
       if (!url) return "";
       
-      // Handle YouTube embedding
-      if (url.includes('youtube.com/embed/') || url.includes('youtu.be/')) {
-        return url;
+      // Handle YouTube videos
+      const youtubeId = getYoutubeVideoId(url);
+      if (youtubeId) {
+        return `https://www.youtube.com/embed/${youtubeId}`;
       }
       
-      // If it's a direct iframe tag
-      if (url.includes('<iframe') && url.includes('src=')) {
+      // Handle direct iframe src URLs
+      if (url.includes('src=')) {
         const srcMatch = url.match(/src=["'](.*?)["']/);
         if (srcMatch && srcMatch[1]) {
           return srcMatch[1];
         }
       }
       
-      // Return original URL if no patterns match
-      return url;
+      // Return original URL if no patterns match and it's a valid URL
+      if (url.startsWith('http')) {
+        return url;
+      }
+      
+      return "";
     } catch (error) {
       console.error("Error processing embed URL:", error);
       return "";
