@@ -15,10 +15,8 @@ const VideoPage = () => {
     queryKey: ['allVideos'],
     queryFn: fetchVideos,
     retry: 3,
-    onSettled: (_data, error) => {
-      if (error) {
-        console.log('Error fetching regular videos', error);
-      }
+    onError: (err) => {
+      console.log('Error fetching regular videos', err);
     }
   });
   
@@ -26,10 +24,8 @@ const VideoPage = () => {
     queryKey: ['allPremiumVideos'],
     queryFn: fetchPremiumVideos,
     retry: 3,
-    onSettled: (_data, error) => {
-      if (error) {
-        console.log('Error fetching premium videos', error);
-      }
+    onError: (err) => {
+      console.log('Error fetching premium videos', err);
     }
   });
   
