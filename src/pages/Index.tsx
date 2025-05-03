@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import CategoryCard from '@/components/CategoryCard';
 import Header from '@/components/Header';
@@ -11,7 +11,16 @@ import AdBanner from '@/components/AdBanner';
 
 // Banner Ad Component
 const BannerAd: React.FC = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
+    if (!containerRef.current) return;
+    
+    // Clear any existing content
+    while (containerRef.current.firstChild) {
+      containerRef.current.removeChild(containerRef.current.firstChild);
+    }
+    
     // Create banner ad script
     const script1 = document.createElement('script');
     script1.type = 'text/javascript';
@@ -24,41 +33,63 @@ const BannerAd: React.FC = () => {
         'params' : {}
       };
     `;
-    document.body.appendChild(script1);
+    containerRef.current.appendChild(script1);
 
     // Create banner ad invoke script
     const script2 = document.createElement('script');
     script2.type = 'text/javascript';
     script2.src = '//www.highperformanceformat.com/85638e75aff36f37df207e7b74261175/invoke.js';
-    document.body.appendChild(script2);
+    containerRef.current.appendChild(script2);
 
     return () => {
-      // Clean up scripts when component unmounts
-      document.body.removeChild(script1);
-      document.body.removeChild(script2);
+      if (containerRef.current) {
+        // Clean up scripts when component unmounts
+        while (containerRef.current.firstChild) {
+          containerRef.current.removeChild(containerRef.current.firstChild);
+        }
+      }
     };
   }, []);
 
-  return <div className="w-full h-[90px] flex justify-center my-4"></div>;
+  return <div ref={containerRef} className="w-full h-[90px] flex justify-center my-4"></div>;
 };
 
 // Native Ad Component
 const NativeAd: React.FC = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  
   useEffect(() => {
+    if (!containerRef.current) return;
+    
     // Create native ad script
     const script = document.createElement('script');
     script.async = true;
     script.setAttribute('data-cfasync', 'false');
     script.src = '//pl26551926.profitableratecpm.com/49ff6bc5f238399984709ffd72c4f841/invoke.js';
-    document.body.appendChild(script);
+    
+    // Create container div for the ad
+    const container = document.createElement('div');
+    container.id = 'container-49ff6bc5f238399984709ffd72c4f841';
+    
+    // Clear existing content and append new elements
+    while (containerRef.current.firstChild) {
+      containerRef.current.removeChild(containerRef.current.firstChild);
+    }
+    
+    containerRef.current.appendChild(script);
+    containerRef.current.appendChild(container);
 
     return () => {
       // Clean up script when component unmounts
-      document.body.removeChild(script);
+      if (containerRef.current) {
+        while (containerRef.current.firstChild) {
+          containerRef.current.removeChild(containerRef.current.firstChild);
+        }
+      }
     };
   }, []);
 
-  return <div id="container-49ff6bc5f238399984709ffd72c4f841" className="my-4 w-full"></div>;
+  return <div ref={containerRef} className="my-4 w-full"></div>;
 };
 
 const Index = () => {
@@ -76,7 +107,9 @@ const Index = () => {
     document.body.appendChild(script);
 
     return () => {
-      document.body.removeChild(script);
+      if (script.parentNode === document.body) {
+        document.body.removeChild(script);
+      }
     };
   }, []);
   

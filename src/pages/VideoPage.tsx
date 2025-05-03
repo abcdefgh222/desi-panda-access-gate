@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import Header from '@/components/Header';
@@ -9,7 +9,16 @@ import AdBanner from '@/components/AdBanner';
 
 // Add this component to inject ad scripts 
 const BannerAd: React.FC = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  
   useEffect(() => {
+    if (!containerRef.current) return;
+    
+    // Clear any existing content
+    while (containerRef.current.firstChild) {
+      containerRef.current.removeChild(containerRef.current.firstChild);
+    }
+    
     // Create banner ad script
     const script1 = document.createElement('script');
     script1.type = 'text/javascript';
@@ -22,41 +31,63 @@ const BannerAd: React.FC = () => {
         'params' : {}
       };
     `;
-    document.body.appendChild(script1);
+    containerRef.current.appendChild(script1);
 
     // Create banner ad invoke script
     const script2 = document.createElement('script');
     script2.type = 'text/javascript';
     script2.src = '//www.highperformanceformat.com/85638e75aff36f37df207e7b74261175/invoke.js';
-    document.body.appendChild(script2);
+    containerRef.current.appendChild(script2);
 
     return () => {
-      // Clean up scripts when component unmounts
-      document.body.removeChild(script1);
-      document.body.removeChild(script2);
+      if (containerRef.current) {
+        // Clean up scripts when component unmounts
+        while (containerRef.current.firstChild) {
+          containerRef.current.removeChild(containerRef.current.firstChild);
+        }
+      }
     };
   }, []);
 
-  return <div className="w-full h-90 flex justify-center my-4"></div>;
+  return <div ref={containerRef} className="w-full h-[90px] flex justify-center my-4"></div>;
 };
 
 // Add this component for native ads
 const NativeAd: React.FC = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  
   useEffect(() => {
+    if (!containerRef.current) return;
+    
+    // Create container div for the ad
+    const container = document.createElement('div');
+    container.id = 'container-49ff6bc5f238399984709ffd72c4f841';
+    
     // Create native ad script
     const script = document.createElement('script');
     script.async = true;
     script.setAttribute('data-cfasync', 'false');
     script.src = '//pl26551926.profitableratecpm.com/49ff6bc5f238399984709ffd72c4f841/invoke.js';
-    document.body.appendChild(script);
+    
+    // Clear existing content and append new elements
+    while (containerRef.current.firstChild) {
+      containerRef.current.removeChild(containerRef.current.firstChild);
+    }
+    
+    containerRef.current.appendChild(script);
+    containerRef.current.appendChild(container);
 
     return () => {
       // Clean up script when component unmounts
-      document.body.removeChild(script);
+      if (containerRef.current) {
+        while (containerRef.current.firstChild) {
+          containerRef.current.removeChild(containerRef.current.firstChild);
+        }
+      }
     };
   }, []);
 
-  return <div id="container-49ff6bc5f238399984709ffd72c4f841" className="my-4"></div>;
+  return <div ref={containerRef} className="my-4 w-full"></div>;
 };
 
 const VideoPage = () => {
@@ -72,7 +103,9 @@ const VideoPage = () => {
     document.body.appendChild(script);
 
     return () => {
-      document.body.removeChild(script);
+      if (script.parentNode === document.body) {
+        document.body.removeChild(script);
+      }
     };
   }, []);
   
@@ -240,7 +273,7 @@ const VideoPage = () => {
                     <div className="mt-4 flex flex-wrap gap-2">
                       {video.tag.split(',').map((tag: string, index: number) => (
                         <span
-                          key={index}
+                          key={`tag-${index}`}
                           className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs"
                         >
                           {tag.trim()}

@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 
 interface AdBannerProps {
@@ -9,17 +9,27 @@ interface AdBannerProps {
 }
 
 const AdBanner: React.FC<AdBannerProps> = ({ position, className, useNativeAd = false }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  
   useEffect(() => {
-    if (useNativeAd) {
+    if (useNativeAd && containerRef.current) {
       // Initialize native ad if requested
       const script = document.createElement('script');
       script.async = true;
       script.setAttribute('data-cfasync', 'false');
       script.src = '//pl26551926.profitableratecpm.com/49ff6bc5f238399984709ffd72c4f841/invoke.js';
-      document.body.appendChild(script);
+      
+      // Clear any existing content before appending
+      while (containerRef.current.firstChild) {
+        containerRef.current.removeChild(containerRef.current.firstChild);
+      }
+      
+      containerRef.current.appendChild(script);
 
       return () => {
-        document.body.removeChild(script);
+        if (containerRef.current && script.parentNode === containerRef.current) {
+          containerRef.current.removeChild(script);
+        }
       };
     }
   }, [useNativeAd]);
@@ -32,7 +42,7 @@ const AdBanner: React.FC<AdBannerProps> = ({ position, className, useNativeAd = 
   };
 
   if (useNativeAd) {
-    return <div id="container-49ff6bc5f238399984709ffd72c4f841" className={className}></div>;
+    return <div id="container-49ff6bc5f238399984709ffd72c4f841" ref={containerRef} className={className}></div>;
   }
 
   return (
@@ -43,9 +53,10 @@ const AdBanner: React.FC<AdBannerProps> = ({ position, className, useNativeAd = 
     )}>
       <div className="text-white text-center w-full">
         <p className="font-bold text-sm">ADVERTISEMENT</p>
+        <div className="py-2 text-center uppercase font-bold">Your Ad Here</div>
         {position === 'top' || position === 'bottom' ? (
-          <div className="my-2 w-full h-[90px]">
-            <div id={`banner-ad-${position}`} className="h-full"></div>
+          <div className="my-2 w-full h-[90px] bg-white/20 flex items-center justify-center">
+            <p className="text-sm">Banner Ad</p>
           </div>
         ) : (
           <>
