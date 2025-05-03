@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -6,11 +5,76 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { fetchVideos, fetchPremiumVideos } from '@/utils/googleSheets';
 import { Download } from 'lucide-react';
+import AdBanner from '@/components/AdBanner';
+
+// Add this component to inject ad scripts 
+const BannerAd: React.FC = () => {
+  useEffect(() => {
+    // Create banner ad script
+    const script1 = document.createElement('script');
+    script1.type = 'text/javascript';
+    script1.innerHTML = `
+      atOptions = {
+        'key' : '85638e75aff36f37df207e7b74261175',
+        'format' : 'iframe',
+        'height' : 90,
+        'width' : 728,
+        'params' : {}
+      };
+    `;
+    document.body.appendChild(script1);
+
+    // Create banner ad invoke script
+    const script2 = document.createElement('script');
+    script2.type = 'text/javascript';
+    script2.src = '//www.highperformanceformat.com/85638e75aff36f37df207e7b74261175/invoke.js';
+    document.body.appendChild(script2);
+
+    return () => {
+      // Clean up scripts when component unmounts
+      document.body.removeChild(script1);
+      document.body.removeChild(script2);
+    };
+  }, []);
+
+  return <div className="w-full h-90 flex justify-center my-4"></div>;
+};
+
+// Add this component for native ads
+const NativeAd: React.FC = () => {
+  useEffect(() => {
+    // Create native ad script
+    const script = document.createElement('script');
+    script.async = true;
+    script.setAttribute('data-cfasync', 'false');
+    script.src = '//pl26551926.profitableratecpm.com/49ff6bc5f238399984709ffd72c4f841/invoke.js';
+    document.body.appendChild(script);
+
+    return () => {
+      // Clean up script when component unmounts
+      document.body.removeChild(script);
+    };
+  }, []);
+
+  return <div id="container-49ff6bc5f238399984709ffd72c4f841" className="my-4"></div>;
+};
 
 const VideoPage = () => {
   const { videoId } = useParams<{ videoId: string }>();
   const [video, setVideo] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  
+  // Add popunder script on page load
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = '//pl26551942.profitableratecpm.com/fa/31/9d/fa319dd102342bb47bed8085a19ad54c.js';
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
   
   const { data: regularVideos, isError: isRegularError } = useQuery({
     queryKey: ['allVideos'],
@@ -116,6 +180,9 @@ const VideoPage = () => {
       <Header />
       
       <main className="flex-grow max-w-7xl mx-auto px-4 py-6 w-full">
+        {/* Add banner ad at the top */}
+        <BannerAd />
+        
         <div className="flex flex-col lg:flex-row gap-4">
           <div className="lg:w-3/4">
             {error ? (
@@ -166,6 +233,9 @@ const VideoPage = () => {
                     <p className="text-gray-700 mt-1">{video.description || "No description available."}</p>
                   </div>
                   
+                  {/* Add native ad after video description */}
+                  <NativeAd />
+                  
                   {video.tag && (
                     <div className="mt-4 flex flex-wrap gap-2">
                       {video.tag.split(',').map((tag: string, index: number) => (
@@ -184,11 +254,12 @@ const VideoPage = () => {
           </div>
           
           <div className="lg:w-1/4">
-            <div className="h-full bg-gray-200 rounded-lg flex items-center justify-center">
-              <span className="text-gray-500 font-medium">ADS SPACE</span>
-            </div>
+            <AdBanner position="right" className="sticky top-20 h-screen" />
           </div>
         </div>
+        
+        {/* Add another banner ad at the bottom */}
+        <BannerAd />
       </main>
       
       <Footer />
