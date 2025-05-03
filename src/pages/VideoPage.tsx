@@ -10,18 +10,32 @@ import { Download } from 'lucide-react';
 const VideoPage = () => {
   const { videoId } = useParams<{ videoId: string }>();
   const [video, setVideo] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
   
-  const { data: regularVideos } = useQuery({
+  const { data: regularVideos, isError: isRegularError } = useQuery({
     queryKey: ['allVideos'],
     queryFn: fetchVideos,
+    retry: 3,
+    onError: () => {
+      console.log('Error fetching regular videos');
+    }
   });
   
-  const { data: premiumVideos } = useQuery({
+  const { data: premiumVideos, isError: isPremiumError } = useQuery({
     queryKey: ['allPremiumVideos'],
     queryFn: fetchPremiumVideos,
+    retry: 3,
+    onError: () => {
+      console.log('Error fetching premium videos');
+    }
   });
   
   useEffect(() => {
+    if (isRegularError && isPremiumError) {
+      setError('Unable to fetch videos. Please try again later.');
+      return;
+    }
+
     if (regularVideos && premiumVideos && videoId) {
       // First check regular videos
       const foundRegular = regularVideos.find(v => v.id === videoId);
@@ -34,9 +48,12 @@ const VideoPage = () => {
       const foundPremium = premiumVideos.find(v => v.id === videoId);
       if (foundPremium) {
         setVideo(foundPremium);
+        return;
       }
+      
+      setError(`Video not found: ${videoId}`);
     }
-  }, [videoId, regularVideos, premiumVideos]);
+  }, [videoId, regularVideos, premiumVideos, isRegularError, isPremiumError]);
 
   // Function to safely extract YouTube video ID from various formats
   const getYoutubeVideoId = (url: string): string | null => {
@@ -97,7 +114,11 @@ const VideoPage = () => {
       <main className="flex-grow max-w-7xl mx-auto px-4 py-6 w-full">
         <div className="flex flex-col lg:flex-row gap-4">
           <div className="lg:w-3/4">
-            {!video ? (
+            {error ? (
+              <div className="text-center py-12">
+                <p className="text-red-500">{error}</p>
+              </div>
+            ) : !video ? (
               <div className="video-container animate-pulse bg-gray-200" style={{ paddingBottom: '56.25%', position: 'relative' }}></div>
             ) : (
               <>
