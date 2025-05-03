@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { recordAgeVerification } from '@/utils/firebase';
 import { toast } from "@/hooks/use-toast";
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface AgeVerificationModalProps {
   onVerified: () => void;
@@ -12,6 +13,7 @@ interface AgeVerificationModalProps {
 const AgeVerificationModal: React.FC<AgeVerificationModalProps> = ({ onVerified }) => {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const isMobile = useIsMobile();
 
   const handleAccept = async () => {
     setIsLoading(true);
@@ -55,18 +57,18 @@ const AgeVerificationModal: React.FC<AgeVerificationModalProps> = ({ onVerified 
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-black text-white rounded-lg p-6 max-w-2xl w-full border border-gray-700 my-6">
+      <div className="bg-black text-white rounded-lg p-4 sm:p-6 max-w-2xl w-full border border-gray-700 my-6 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-center mb-4">
-          <div className="bg-adult-red rounded-full p-4 w-24 h-24 flex items-center justify-center">
-            <span className="text-4xl font-bold">18+</span>
+          <div className="bg-adult-red rounded-full p-3 sm:p-4 w-16 h-16 sm:w-24 sm:h-24 flex items-center justify-center">
+            <span className="text-2xl sm:text-4xl font-bold">18+</span>
           </div>
         </div>
         
-        <h1 className="text-3xl font-bold text-center mb-6">
+        <h1 className="text-xl sm:text-3xl font-bold text-center mb-4 sm:mb-6">
           Desi Panda is an ADULTS ONLY website!
         </h1>
         
-        <div className="space-y-4 mb-8">
+        <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8 text-sm sm:text-base">
           <p>
             You are about to enter a website that contains explicit material (pornography). This website should only be 
             accessed if you are at least 18 years of age, or at least the age to view such material in your local jurisdiction, 
@@ -99,23 +101,23 @@ const AgeVerificationModal: React.FC<AgeVerificationModalProps> = ({ onVerified 
           </ul>
         </div>
         
-        <div className="flex flex-col items-center gap-4 mt-6 sticky bottom-4">
+        <div className="flex flex-col items-center gap-3 sm:gap-4 mt-4 sm:mt-6 pb-2">
           <button 
             onClick={handleAccept} 
             disabled={isLoading}
-            className="entry-button w-full sm:w-auto bg-adult-button text-white px-6 py-3 rounded-md hover:bg-opacity-90 transition-colors"
+            className="entry-button w-full sm:w-auto bg-adult-button text-white px-4 sm:px-6 py-3 rounded-md hover:bg-opacity-90 transition-colors text-base sm:text-lg"
           >
             {isLoading ? "Processing..." : "I AM 18+ ENTER"}
           </button>
           
           <button 
             onClick={handleReject}
-            className="text-gray-400 hover:text-white transition-colors mt-2"
+            className="text-gray-400 hover:text-white transition-colors mt-1 sm:mt-2"
           >
             No, I am under 18
           </button>
           
-          <p className="text-sm text-center text-gray-400 mt-2">
+          <p className="text-xs sm:text-sm text-center text-gray-400 mt-1 sm:mt-2">
             When accessing this site you are agree to our{" "}
             <Link to="/terms" className="text-adult-button hover:underline">
               Terms of Service
