@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -16,8 +15,10 @@ const VideoPage = () => {
     queryKey: ['allVideos'],
     queryFn: fetchVideos,
     retry: 3,
-    onError: () => {
-      console.log('Error fetching regular videos');
+    onSettled: (_data, error) => {
+      if (error) {
+        console.log('Error fetching regular videos', error);
+      }
     }
   });
   
@@ -25,8 +26,10 @@ const VideoPage = () => {
     queryKey: ['allPremiumVideos'],
     queryFn: fetchPremiumVideos,
     retry: 3,
-    onError: () => {
-      console.log('Error fetching premium videos');
+    onSettled: (_data, error) => {
+      if (error) {
+        console.log('Error fetching premium videos', error);
+      }
     }
   });
   
