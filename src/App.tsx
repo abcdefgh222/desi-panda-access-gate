@@ -3,23 +3,42 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { HashRouter, Routes, Route } from "react-router-dom";
+import { HashRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import { lazy, Suspense } from "react";
 
-// Pages
-import Index from "./pages/Index";
-import CategoryPage from "./pages/CategoryPage";
-import PremiumSubcategoryPage from "./pages/PremiumSubcategoryPage";
-import VideoPage from "./pages/VideoPage";
-import LoginPage from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage";
-import TermsPage from "./pages/TermsPage";
-import PrivacyPage from "./pages/PrivacyPage";
-import DmcaPage from "./pages/DmcaPage";
-import SearchPage from "./pages/SearchPage";
-import TagPage from "./pages/TagPage";
-import NotFound from "./pages/NotFound";
-import StatementPage from "./pages/StatementPage";
+// Create a loading component
+const Loading = () => (
+  <div className="flex items-center justify-center h-screen">
+    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-adult-button"></div>
+  </div>
+);
+
+// Lazily load pages to improve initial loading time
+const Index = lazy(() => import("./pages/Index"));
+const CategoryPage = lazy(() => import("./pages/CategoryPage"));
+const PremiumSubcategoryPage = lazy(() => import("./pages/PremiumSubcategoryPage"));
+const VideoPage = lazy(() => import("./pages/VideoPage"));
+const LoginPage = lazy(() => import("./pages/LoginPage"));
+const RegisterPage = lazy(() => import("./pages/RegisterPage"));
+const TermsPage = lazy(() => import("./pages/TermsPage"));
+const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
+const DmcaPage = lazy(() => import("./pages/DmcaPage"));
+const SearchPage = lazy(() => import("./pages/SearchPage"));
+const TagPage = lazy(() => import("./pages/TagPage"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const StatementPage = lazy(() => import("./pages/StatementPage"));
+
+// Scroll to top on route change
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  React.useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -38,22 +57,25 @@ const App = () => (
         <Toaster />
         <Sonner />
         <HashRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/category/:categoryId" element={<CategoryPage />} />
-            <Route path="/premium/:subcategoryId" element={<PremiumSubcategoryPage />} />
-            <Route path="/video/:videoId" element={<VideoPage />} />
-            <Route path="/search" element={<SearchPage />} />
-            <Route path="/tag/:tagId" element={<TagPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/terms" element={<TermsPage />} />
-            <Route path="/privacy" element={<PrivacyPage />} />
-            <Route path="/dmca" element={<DmcaPage />} />
-            <Route path="/2257" element={<StatementPage />} />
-            <Route path="/faq" element={<StatementPage />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <ScrollToTop />
+          <Suspense fallback={<Loading />}>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/category/:categoryId" element={<CategoryPage />} />
+              <Route path="/premium/:subcategoryId" element={<PremiumSubcategoryPage />} />
+              <Route path="/video/:videoId" element={<VideoPage />} />
+              <Route path="/search" element={<SearchPage />} />
+              <Route path="/tag/:tagId" element={<TagPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/terms" element={<TermsPage />} />
+              <Route path="/privacy" element={<PrivacyPage />} />
+              <Route path="/dmca" element={<DmcaPage />} />
+              <Route path="/2257" element={<StatementPage />} />
+              <Route path="/faq" element={<StatementPage />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
         </HashRouter>
       </TooltipProvider>
     </AuthProvider>

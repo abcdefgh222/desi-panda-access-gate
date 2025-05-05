@@ -13,22 +13,30 @@ const AdBanner: React.FC<AdBannerProps> = ({ position, className, useNativeAd = 
   
   useEffect(() => {
     if (useNativeAd && containerRef.current) {
-      // Initialize native ad if requested
-      const script = document.createElement('script');
-      script.async = true;
-      script.setAttribute('data-cfasync', 'false');
-      script.src = '//pl26551926.profitableratecpm.com/49ff6bc5f238399984709ffd72c4f841/invoke.js';
-      
-      // Clear any existing content before appending
-      while (containerRef.current.firstChild) {
-        containerRef.current.removeChild(containerRef.current.firstChild);
-      }
-      
-      containerRef.current.appendChild(script);
+      // Delay ad loading to improve initial page loading time
+      const timer = setTimeout(() => {
+        // Initialize native ad if requested
+        const script = document.createElement('script');
+        script.async = true;
+        script.setAttribute('data-cfasync', 'false');
+        script.src = '//pl26551926.profitableratecpm.com/49ff6bc5f238399984709ffd72c4f841/invoke.js';
+        
+        // Clear any existing content before appending
+        if (containerRef.current) {
+          while (containerRef.current.firstChild) {
+            containerRef.current.removeChild(containerRef.current.firstChild);
+          }
+          
+          containerRef.current.appendChild(script);
+        }
+      }, 1000); // Delay ad loading by 1 second
 
       return () => {
-        if (containerRef.current && script.parentNode === containerRef.current) {
-          containerRef.current.removeChild(script);
+        clearTimeout(timer);
+        if (containerRef.current) {
+          while (containerRef.current.firstChild) {
+            containerRef.current.removeChild(containerRef.current.firstChild);
+          }
         }
       };
     }

@@ -7,39 +7,46 @@ import { fetchVideos, fetchPremiumVideos } from '@/utils/googleSheets';
 import { Download } from 'lucide-react';
 import AdBanner from '@/components/AdBanner';
 
-// Add this component to inject ad scripts 
+// Add this component to inject ad scripts - Modified to prevent redirects
 const BannerAd: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
     if (!containerRef.current) return;
     
-    // Clear any existing content
-    while (containerRef.current.firstChild) {
-      containerRef.current.removeChild(containerRef.current.firstChild);
-    }
-    
-    // Create banner ad script
-    const script1 = document.createElement('script');
-    script1.type = 'text/javascript';
-    script1.innerHTML = `
-      atOptions = {
-        'key' : '85638e75aff36f37df207e7b74261175',
-        'format' : 'iframe',
-        'height' : 90,
-        'width' : 728,
-        'params' : {}
-      };
-    `;
-    containerRef.current.appendChild(script1);
+    // Delay ad loading to improve page loading time
+    const timer = setTimeout(() => {
+      if (containerRef.current) {
+        // Clear any existing content
+        while (containerRef.current.firstChild) {
+          containerRef.current.removeChild(containerRef.current.firstChild);
+        }
+        
+        // Create banner ad script
+        const script1 = document.createElement('script');
+        script1.type = 'text/javascript';
+        script1.innerHTML = `
+          atOptions = {
+            'key' : '85638e75aff36f37df207e7b74261175',
+            'format' : 'iframe',
+            'height' : 90,
+            'width' : 728,
+            'params' : {}
+          };
+        `;
+        containerRef.current.appendChild(script1);
 
-    // Create banner ad invoke script
-    const script2 = document.createElement('script');
-    script2.type = 'text/javascript';
-    script2.src = '//www.highperformanceformat.com/85638e75aff36f37df207e7b74261175/invoke.js';
-    containerRef.current.appendChild(script2);
+        // Create banner ad invoke script with async to prevent blocking
+        const script2 = document.createElement('script');
+        script2.type = 'text/javascript';
+        script2.async = true;
+        script2.src = '//www.highperformanceformat.com/85638e75aff36f37df207e7b74261175/invoke.js';
+        containerRef.current.appendChild(script2);
+      }
+    }, 1500); // Delay ad loading by 1.5 seconds
 
     return () => {
+      clearTimeout(timer);
       if (containerRef.current) {
         // Clean up scripts when component unmounts
         while (containerRef.current.firstChild) {
@@ -52,32 +59,38 @@ const BannerAd: React.FC = () => {
   return <div ref={containerRef} className="w-full h-[90px] flex justify-center my-4"></div>;
 };
 
-// Add this component for native ads
+// Add this component for native ads - Modified to prevent redirects
 const NativeAd: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
     if (!containerRef.current) return;
     
-    // Create container div for the ad
-    const container = document.createElement('div');
-    container.id = 'container-49ff6bc5f238399984709ffd72c4f841';
-    
-    // Create native ad script
-    const script = document.createElement('script');
-    script.async = true;
-    script.setAttribute('data-cfasync', 'false');
-    script.src = '//pl26551926.profitableratecpm.com/49ff6bc5f238399984709ffd72c4f841/invoke.js';
-    
-    // Clear existing content and append new elements
-    while (containerRef.current.firstChild) {
-      containerRef.current.removeChild(containerRef.current.firstChild);
-    }
-    
-    containerRef.current.appendChild(script);
-    containerRef.current.appendChild(container);
+    // Delay ad loading to improve page loading time
+    const timer = setTimeout(() => {
+      if (containerRef.current) {
+        // Create container div for the ad
+        const container = document.createElement('div');
+        container.id = 'container-49ff6bc5f238399984709ffd72c4f841';
+        
+        // Clear existing content
+        while (containerRef.current.firstChild) {
+          containerRef.current.removeChild(containerRef.current.firstChild);
+        }
+        
+        containerRef.current.appendChild(container);
+        
+        // Create native ad script with async to prevent blocking
+        const script = document.createElement('script');
+        script.async = true;
+        script.setAttribute('data-cfasync', 'false');
+        script.src = '//pl26551926.profitableratecpm.com/49ff6bc5f238399984709ffd72c4f841/invoke.js';
+        containerRef.current.appendChild(script);
+      }
+    }, 2000); // Delay ad loading by 2 seconds
 
     return () => {
+      clearTimeout(timer);
       // Clean up script when component unmounts
       if (containerRef.current) {
         while (containerRef.current.firstChild) {
@@ -95,19 +108,7 @@ const VideoPage = () => {
   const [video, setVideo] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   
-  // Add popunder script on page load
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.type = 'text/javascript';
-    script.src = '//pl26551942.profitableratecpm.com/fa/31/9d/fa319dd102342bb47bed8085a19ad54c.js';
-    document.body.appendChild(script);
-
-    return () => {
-      if (script.parentNode === document.body) {
-        document.body.removeChild(script);
-      }
-    };
-  }, []);
+  // Remove popunder ad script - this is likely causing the redirects
   
   const { data: regularVideos, isError: isRegularError } = useQuery({
     queryKey: ['allVideos'],
